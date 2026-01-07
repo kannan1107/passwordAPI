@@ -1,22 +1,27 @@
-import nodemailer from "nodemailer";
+import SibApiV3Sdk from 'sib-api-v3-sdk';
 
-const sendEmail = async ({ to, subject, link }) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+const sendEmail = async ({ to, subject, text, link }) => {
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+  const apiKey = defaultClient.authentications['api-key'];
+  apiKey.apiKey = process.env.BREVO_API_KEY;
 
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to,
-    subject: "Password Reset",
-    html: `<p>Click to reset password:</p><a href="${link}">${link}</a>`,
+  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+  let htmlContent;
+  if (link) {
+    htmlContent = `<p>Click to reset password:</p><a href="${link}">${link}</a>`;
+  } else {
+    htmlContent = `<p>${text.replace(/\n/g, '<br>')}</p>`;
+  }
+
+  const sendSmtpEmail = {
+    to: [{ email: to }],
+    sender: { email: process.env.BREVO_SENDER_EMAIL, name: process.env.BREVO_SENDER_NAME || 'Password Manager' },
+    subject: subject,
+    htmlContent: htmlContent
   };
 
-  return await transporter.sendMail(mailOptions);
+  return await apiInstance.sendTransacEmail(sendSmtpEmail);
 };
 
 export default sendEmail;

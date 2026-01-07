@@ -37,14 +37,12 @@ export const createUser = async (req, res) => {
     });
 
     console.log("Attempting to send email to:", email);
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
 
     try {
       const emailResult = await sendEmail({
         to: email,
-        subject: "Welcome to Event Management System",
-        text: `Hello ${name},\n\nYour account has been created successfully.\n\nYour login credentials are:\nEmail: ${email}\nphone: ${phone}\nPassword: ${plainPassword}\n\nPlease change your password after logging in for the first time.\n\nThank you!`,
+        subject: "Welcome to Password Manager",
+        text: `Hello ${name},\n\nYour account has been created successfully.\n\nYour login credentials are:\nEmail: ${email}\nPhone: ${phone}\nPassword: ${plainPassword}\n\nPlease change your password after logging in for the first time.\n\nThank you!`,
       });
       console.log("✅ Email sent successfully:", emailResult.messageId);
     } catch (emailError) {
