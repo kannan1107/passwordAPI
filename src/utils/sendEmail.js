@@ -28,15 +28,14 @@ const sendEmail = async ({ to, subject, text, link }) => {
       )}</p></div>`;
     }
 
-    const mailOptions = {
+    const result = await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to,
       subject,
       html: htmlContent,
-    };
+    });
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully via Gmail");
+    console.log("✅ Email sent via Gmail", result.messageId);
     return result;
   } catch (error) {
     console.error("❌ Email failed:", error.message);
