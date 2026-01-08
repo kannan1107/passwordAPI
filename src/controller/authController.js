@@ -44,10 +44,9 @@ export const createUser = async (req, res) => {
         subject: "Welcome to Password Manager",
         text: `Hello ${name},\n\nYour account has been created successfully.\n\nYour login credentials are:\nEmail: ${email}\nPhone: ${phone}\nPassword: ${plainPassword}\n\nPlease change your password after logging in for the first time.\n\nThank you!`,
       });
-      console.log("✅ Email sent successfully:", emailResult.messageId);
+      console.log("✅ Email sent successfully via Brevo");
     } catch (emailError) {
       console.error("❌ Email failed:", emailError.message);
-      console.error("Full error:", emailError);
     }
 
     return res.status(201).json({
@@ -325,17 +324,23 @@ export const forgotPassword = async (req, res) => {
       process.env.PORT || 6500
     }/api/reset-password?token=${resetToken}`;
 
-    await sendEmail({
-      to: email,
-      subject: "Password Reset Request",
-      link: resetLink,
-    });
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Password Reset Request",
+        link: resetLink,
+      });
+      console.log("✅ Password reset email sent via Brevo");
+    } catch (emailError) {
+      console.error("❌ Email sending failed:", emailError.message);
+    }
 
     res.status(200).json({
       status: "success",
       message: "Password reset email sent successfully",
     });
   } catch (error) {
+    console.error("Forgot password error:", error);
     res.status(500).json({
       status: "error",
       message: error.message,
