@@ -242,18 +242,40 @@ export const resetPassword = async (req, res) => {
   }
 
   res.send(`
+    <!DOCTYPE html>
     <html>
-      <head><title>Reset Password</title></head>
+      <head>
+        <title>Reset Password</title>
+        <style>
+          body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f2f5; }
+          .card { background: #fff; padding: 32px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+          h2 { margin-top: 0; color: #333; }
+          label { display: block; margin-bottom: 6px; color: #555; font-size: 14px; }
+          input[type="password"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box; margin-bottom: 16px; }
+          input[type="password"]:focus { outline: none; border-color: #007bff; }
+          button { width: 100%; padding: 11px; background: #007bff; color: #fff; border: none; border-radius: 5px; font-size: 15px; cursor: pointer; }
+          button:hover { background: #0056b3; }
+        </style>
+      </head>
       <body>
-        <h2>Reset Your Password</h2>
-        <form action="/api/update-password" method="POST">
-          <input type="hidden" name="token" value="${token}">
-          <div>
-            <label>New Password:</label><br>
-            <input type="password" name="password" required minlength="6">
-          </div><br>
-          <button type="submit">Reset Password</button>
-        </form>
+        <div class="card">
+          <h2>Reset Your Password</h2>
+          <form action="/api/update-password" method="POST">
+            <input type="hidden" name="token" value="${token}">
+            <label>New Password</label>
+            <input type="password" name="password" placeholder="Enter new password" required minlength="6">
+            <label>Confirm Password</label>
+            <input type="password" name="confirmPassword" placeholder="Confirm new password" required minlength="6">
+            <button type="submit">Reset Password</button>
+          </form>
+        </div>
+        <script>
+          document.querySelector('form').addEventListener('submit', function(e) {
+            const p = document.querySelector('[name=password]').value;
+            const c = document.querySelector('[name=confirmPassword]').value;
+            if (p !== c) { e.preventDefault(); alert('Passwords do not match!'); }
+          });
+        </script>
       </body>
     </html>
   `);
@@ -261,10 +283,14 @@ export const resetPassword = async (req, res) => {
 
 export const updatePassword = async (req, res) => {
   try {
-    const { token, password } = req.body;
+    const { token, password, confirmPassword } = req.body;
 
     if (!token || !password) {
       return res.send("<h2>Missing token or password</h2>");
+    }
+
+    if (password !== confirmPassword) {
+      return res.send("<h2>Passwords do not match</h2>");
     }
 
     const decoded = jwt.verify(token, process.env.JWT_AUTH_SECRET_KEY);

@@ -1,42 +1,34 @@
-import nodemailer from "nodemailer";
-
 const sendEmail = async ({ to, subject, text, link }) => {
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    let htmlContent;
-    if (link) {
-      htmlContent = `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
+    const htmlContent = link
+      ? `<div style="font-family:Arial,sans-serif;padding:20px">
           <h2>Password Reset Request</h2>
           <p>Click the button below to reset your password:</p>
-          <a href="${link}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
+          <a href="${link}" style="background:#007bff;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px">Reset Password</a>
           <p>Or copy this link: ${link}</p>
           <p>This link will expire in 1 hour.</p>
-        </div>
-      `;
-    } else {
-      htmlContent = `<div style="font-family: Arial, sans-serif; padding: 20px;"><p>${text.replace(
-        /\n/g,
-        "<br>"
-      )}</p></div>`;
-    }
+        </div>`
+      : `<div style="font-family:Arial,sans-serif;padding:20px"><p>${text.replace(/\n/g, "<br>")}</p></div>`;
 
-    const result = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      html: htmlContent,
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender: { name: process.env.EMAIL_SENDER_NAME, email: process.env.EMAIL_SENDER },
+        to: [{ email: to }],
+        subject,
+        htmlContent,
+      }),
     });
 
-    console.log("✅ Email sent via Gmail", result.messageId);
-    return result;
+    const data = await res.json();
+    if (!res.ok) throw new Error(JSON.stringify(data));
+
+    console.log("✅ Email sent via Brevo", data.messageId);
+    return data;
   } catch (error) {
     console.error("❌ Email failed:", error.message);
     throw error;
