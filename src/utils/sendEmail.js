@@ -10,7 +10,7 @@ const sendEmail = async ({ to, subject, text, link }) => {
         </div>`
       : `<div style="font-family:Arial,sans-serif;padding:20px"><p>${text.replace(/\n/g, "<br>")}</p></div>`;
 
-    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    const res = await fetch("https://api.brevo.com/v3/emailCampaigns/email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
