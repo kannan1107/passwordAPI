@@ -10,7 +10,7 @@ const sendEmail = async ({ to, subject, text, link }) => {
         </div>`
       : `<div style="font-family:Arial,sans-serif;padding:20px"><p>${text.replace(/\n/g, "<br>")}</p></div>`;
 
-    const res = await fetch("https://api.brevo.com/v3/emailCampaigns/email", {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -23,7 +23,11 @@ const sendEmail = async ({ to, subject, text, link }) => {
         htmlContent,
       }),
     });
-
+console.log("ENV CHECK:", {
+  apiKey: process.env.BREVO_API_KEY,
+  sender: process.env.EMAIL_SENDER,
+  name: process.env.EMAIL_SENDER_NAME,
+});
     const data = await res.json();
     if (!res.ok) throw new Error(JSON.stringify(data));
 
