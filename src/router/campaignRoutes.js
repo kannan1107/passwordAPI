@@ -1,23 +1,21 @@
-const express = require('express');
-const { createEmailCampaign } = require('../config/brevo');
-const router = express.Router();
+import { Router } from "express";
+import { createEmailCampaign } from "../config/brevo.js";
 
-router.post('/create-campaign', async (req, res) => {
+const campaignRoutes = Router();
+
+campaignRoutes.post("/create-campaign", async (req, res) => {
   try {
-    const campaignData = {
-      name: req.body.name || "Campaign sent via API",
-      subject: req.body.subject || "My subject",
-      sender: req.body.sender || { name: "From name", email: "myfromemail@mycompany.com" },
-      htmlContent: req.body.htmlContent || 'Congratulations! You successfully sent this example campaign via the Brevo API.',
-      recipients: req.body.recipients || { listIds: [2, 7] },
-      scheduledAt: req.body.scheduledAt
-    };
+    const { name, subject, sender, htmlContent, recipients, scheduledAt } = req.body;
 
-    const result = await createEmailCampaign(campaignData);
-    res.json({ success: true, data: result });
+    if (!name || !subject || !sender || !htmlContent || !recipients) {
+      return res.status(400).json({ success: false, error: "name, subject, sender, htmlContent and recipients are required" });
+    }
+
+    const result = await createEmailCampaign({ name, subject, sender, htmlContent, recipients, scheduledAt });
+    res.status(201).json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-module.exports = router;
+export default campaignRoutes;
