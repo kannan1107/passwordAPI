@@ -314,7 +314,7 @@ export const updatePassword = async (req, res) => {
           <p>Your password has been updated successfully.</p>
           <script>
             setTimeout(() => {
-              window.location.href = 'http://localhost:5173/login';
+              window.location.href = '${process.env.FRONTEND_URL || "http://localhost:5173"}/login';
             }, 2000);
           </script>
         </body>
@@ -350,9 +350,12 @@ export const forgotPassword = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    const resetLink = `http://localhost:${
-      process.env.PORT || 6500
-    }/api/reset-password?token=${resetToken}`;
+    const baseUrl = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 6500}`;
+    
+    // Ensure baseUrl doesn't have a trailing slash before appending path
+    const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
+    const resetLink = `${cleanBaseUrl}/api/reset-password?token=${resetToken}`;
+    console.log("🔗 Generated Reset Link:", resetLink);
 
     try {
       await mail({
