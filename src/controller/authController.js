@@ -1,7 +1,7 @@
 import User from "../models/User.js";
-import sendEmail from "../utils/sendEmail.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mail from "../utils/sendEmail.js";
 
 export const createUser = async (req, res) => {
   try {
@@ -25,21 +25,21 @@ export const createUser = async (req, res) => {
     }
 
     const plainPassword = password || "password123";
-    // const salt = await bcrypt.genSalt(10);
-    // const hashedPassword = await bcrypt.hash(plainPassword, salt);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(plainPassword, salt);
 
     const newUser = await User.create({
       name,
       email,
       phone,
-      password: plainPassword,
+      password: hashedPassword,
       role: role || "user",
     });
 
     console.log("Attempting to send email to:", email);
 
     try {
-      const emailResult = await sendEmail({
+      const emailResult = await mail({
         to: email,
         subject: "Welcome to Password Manager",
         text: `Hello ${name},\n\nYour account has been created successfully.\n\nYour login credentials are:\nEmail: ${email}\nPhone: ${phone}\nPassword: ${plainPassword}\n\nPlease change your password after logging in for the first time.\n\nThank you!`,
@@ -81,7 +81,8 @@ export const loginUser = async (req, res) => {
     });
   }
 
-  if (user.password !== password) {
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
     return res.status(400).json({
       status: "error",
       message: "Invalid credentials",
@@ -300,7 +301,10 @@ export const updatePassword = async (req, res) => {
       return res.send("<h2>User not found</h2>");
     }
 
-    user.password = password;
+    // Hash the new password before saving
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    
     await user.save();
 
     res.send(`
@@ -351,7 +355,7 @@ export const forgotPassword = async (req, res) => {
     }/api/reset-password?token=${resetToken}`;
 
     try {
-      await sendEmail({
+      await mail({
         to: email,
         subject: "Password Reset Request",
         link: resetLink,
