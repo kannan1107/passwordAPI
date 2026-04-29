@@ -75,7 +75,7 @@ export const forgotPassword = async (req, res) => {
       expiresIn: "1h",
     });
 
-    const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173/").replace(/\/+$/, "");
+    const frontendUrl = (process.env.FRONTEND_URL || "https://passwords-r2di.onrender.com").replace(/\/+$/, "");
     const resetUrl = `${frontendUrl}/resetPassword/${user._id}/${token}`;
     const emailText = `You are receiving this email because you have requested to reset your password.
 Please click the following link to reset your password: ${resetUrl}
