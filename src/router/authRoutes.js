@@ -23,5 +23,6 @@ authRoutes.get("/users/:id", getUserById);
 authRoutes.post("/forgot-password", forgotPassword);
 authRoutes.post("/reset-password/:id/:token", resetPassword);
 authRoutes.post("/update-password", updatePassword);
+authRoutes.put("/update-password", updatePassword);
 
 export default authRoutes;
