@@ -3,7 +3,6 @@ import {
   forgotPassword,
   createUser,
   getAllUsers,
-  updateUserRole,
   getUserById,
   updateUser,
   loginUser,
@@ -22,7 +21,7 @@ authRoutes.put("/users/:id", updateUser);
 authRoutes.get("/users/:id", getUserById);
 
 authRoutes.post("/forgot-password", forgotPassword);
-authRoutes.get("/reset-password", resetPassword);
+authRoutes.post("/reset-password/:id/:token", resetPassword);
 authRoutes.post("/update-password", updatePassword);
 
 export default authRoutes;
